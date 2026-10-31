@@ -1,0 +1,366 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Bingo Caller — Clubhouse Layout v8</title>
+<style>
+:root {
+  --navy:#102b49;
+  --navy2:#173d63;
+  --green:#92d050;
+  --orange:#fe9650;
+  --paper:#f4f6f8;
+  --line:#b8c6d2;
+  --called:#d8efd0;
+  --called-ink:#174b25;
+  --gold:#f6d365;
+}
+* { box-sizing:border-box; }
+html, body { margin:0; min-height:100%; height:100%; }
+body {
+  background:var(--paper);
+  color:#102235;
+  font-family:Arial, Helvetica, sans-serif;
+}
+.app {
+  height:100vh;
+  height:100dvh;
+  min-height:0;
+  overflow:hidden;
+  padding:clamp(4px,.6vh,8px) clamp(8px,1.2vw,20px);
+  display:flex;
+  flex-direction:column;
+  gap:clamp(4px,.5vh,8px);
+}
+.topbar {
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  min-height:44px;
+  background:var(--navy);
+  color:#fff;
+  border-radius:10px;
+  padding:6px 12px;
+}
+.topbar h1 {
+  margin:0;
+  text-align:center;
+  font-size:clamp(1.3rem,2.5vw,2.2rem);
+  line-height:1.1;
+  letter-spacing:.04em;
+}
+.main {
+  flex:1 1 0;
+  min-height:0;
+  overflow:hidden;
+  display:grid;
+  grid-template-columns:minmax(0, 2fr) minmax(300px, .9fr);
+  gap:clamp(10px,1.4vw,22px);
+}
+.board-panel, .controls-panel {
+  min-width:0;
+  min-height:0;
+  background:#fff;
+  border:2px solid #d4dde4;
+  border-radius:12px;
+  padding:clamp(4px,.5vw,8px);
+}
+.board-panel { display:flex; flex-direction:column; min-width:0; grid-column:1; grid-row:1; }
+.board {
+  display:grid;
+  grid-template-columns:repeat(5,minmax(0,1fr));
+  grid-template-rows: minmax(0, 0.9fr) repeat(15, minmax(0, 1.12fr));
+  gap:clamp(3px,.45vw,7px);
+  flex:1;
+  min-height:0;
+}
+.head, .num {
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  min-width:0;
+  border-radius:5px;
+  font-weight:800;
+}
+.head {
+  background:var(--navy);
+  color:#fff;
+  font-size:clamp(1.3rem,2.2vw,2.15rem);
+}
+.num {
+  background:#fff;
+  border:2px solid var(--line);
+  color:#142a3b;
+  font-size:clamp(1.35rem,2.3vw,2.4rem);
+  font-variant-numeric:tabular-nums;
+}
+.num.called {
+  background:var(--called);
+  border-color:#5e9b4c;
+  color:var(--called-ink);
+}
+.num.latest {
+  background:var(--gold);
+  border-color:#946f00;
+  color:#152a3d;
+  box-shadow:inset 0 0 0 2px #fff5c8;
+}
+.controls-panel {
+  display:flex;
+  grid-column:2;
+  grid-row:1;
+  flex-direction:column;
+  align-items:stretch;
+  gap:clamp(10px,1.4vh,20px);
+}
+.big-button {
+  border:3px solid #234052;
+  border-radius:999px;
+  min-height:clamp(72px,11vh,118px);
+  padding:10px 14px;
+  color:#102235;
+  font-weight:900;
+  font-size:clamp(1.15rem,2vw,2rem);
+  line-height:1.12;
+  text-align:center;
+  box-shadow:0 3px 0 #0002;
+  cursor:pointer;
+}
+.big-button:active { transform:translateY(1px); box-shadow:0 1px 0 #0002; }
+.big-button:focus-visible, button:focus-visible, select:focus-visible {
+  outline:4px solid #1679c4;
+  outline-offset:3px;
+}
+.pick { background:var(--green); }
+.reset { background:var(--orange); }
+.current-card {
+  flex:1 1 0;
+  min-height:0;
+  display:flex;
+  flex-direction:column;
+  align-items:center;
+  justify-content:center;
+  gap:clamp(8px,1.3vh,16px);
+  background:var(--navy);
+  color:#fff;
+  border-radius:12px;
+  border:3px solid #0a1d31;
+  padding:12px;
+  text-align:center;
+}
+.current-label {
+  font-size:clamp(1rem,1.5vw,1.35rem);
+  font-weight:800;
+  letter-spacing:.1em;
+}
+.current-number {
+  width:100%;
+  font-size:clamp(3rem,6vw,6.4rem);
+  font-weight:900;
+  line-height:1;
+  overflow-wrap:anywhere;
+}
+.status {
+  font-size:clamp(.9rem,1.25vw,1.15rem);
+  font-weight:700;
+  color:#e7f0f7;
+  min-height:1.3em;
+}
+.voice-row {
+  display:grid;
+  grid-template-columns:minmax(0,1fr) auto;
+  align-items:center;
+  gap:8px;
+}
+.voice-row label { font-size:1rem; font-weight:700; }
+select, .small-button {
+  border:2px solid #8da2b1;
+  border-radius:8px;
+  padding:9px;
+  font-size:1rem;
+  background:#fff;
+  color:#102235;
+}
+.small-button { cursor:pointer; font-weight:700; }
+.bottomline {
+  flex:0 0 auto;
+  display:flex;
+  justify-content:space-between;
+  align-items:center;
+  gap:10px;
+  font-size:clamp(.8rem,1vw,.95rem);
+  color:#415565;
+  padding:0 3px;
+}
+.history {
+  display:flex;
+  gap:5px;
+  flex-wrap:wrap;
+  font-weight:800;
+}
+.history span {
+  display:inline-block;
+  border:1px solid #b8c6d2;
+  background:#fff;
+  border-radius:5px;
+  padding:3px 6px;
+}
+@media (max-width:620px) {
+  .app {
+    height:auto;
+    min-height:100vh;
+    min-height:100dvh;
+    overflow:visible;
+  }
+  .main { grid-template-columns:1fr; overflow:visible; }
+  .board-panel, .controls-panel { grid-column:1; grid-row:auto; }
+  .board-panel { height:62vh; min-height:360px; }
+  .controls-panel { display:grid; grid-template-columns:1fr 1fr; }
+  .current-card { grid-column:1 / -1; min-height:190px; order:3; }
+  .voice-row { grid-column:1 / -1; order:4; }
+  .big-button { min-height:76px; }
+  .bottomline { flex-direction:column; align-items:flex-start; }
+}
+@media (max-height:760px) and (min-width:761px) {
+  .app { gap:4px; padding:4px 10px; }
+  .board-panel, .controls-panel { padding:5px; }
+  .board { gap:3px; }
+  .head { font-size:1.25rem; }
+  .num { font-size:clamp(1.1rem,2vw,1.8rem); border-width:1px; }
+  .controls-panel { gap:7px; }
+  .big-button { min-height:68px; font-size:1.25rem; }
+  .current-card { min-height:0; padding:8px; gap:6px; }
+  .current-number { font-size:clamp(2.6rem,5vw,4.6rem); }
+}
+</style>
+</head>
+<body>
+<div class="app">
+  <main class="main">
+    <section class="board-panel" aria-label="Bingo number board">
+      <div class="board" id="board"></div>
+    </section>
+    <section class="controls-panel" aria-label="Bingo controls">
+      <button class="big-button pick" id="pickButton">PICK THE NEXT<br>NUMBER</button>
+      <button class="big-button reset" id="resetButton">START A<br>NEW GAME</button>
+      <div class="current-card" aria-live="polite">
+        <div class="current-label">NUMBER CALLED</div>
+        <div class="current-number" id="currentNumber">READY</div>
+        <div class="status" id="status">Ready to play</div>
+      </div>
+    </section>
+  </main>
+  <footer class="bottomline">
+    <div>75-number game · Calls are announced twice</div>
+    <div class="history" id="history" aria-label="Most recent calls"><span>Recent: none</span></div>
+  </footer>
+</div>
+<script>
+(() => {
+  const KEY = "portableBingoCaller_clubhouse_v2";
+  const letters = ["B","I","N","G","O"];
+  let called = [];
+  let current = null;
+  let voices = [];
+  const board = document.getElementById("board");
+  const currentEl = document.getElementById("currentNumber");
+  const statusEl = document.getElementById("status");
+  const historyEl = document.getElementById("history");
+  const pickButton = document.getElementById("pickButton");
+  let preferredVoice = null;
+  const letterFor = n => n <= 15 ? "B" : n <= 30 ? "I" : n <= 45 ? "N" : n <= 60 ? "G" : "O";
+  const spoken = n => `${letterFor(n)} ${n}`;
+  function buildBoard() {
+    board.innerHTML = "";
+    letters.forEach(letter => {
+      const h = document.createElement("div");
+      h.className = "head"; h.textContent = letter; board.appendChild(h);
+    });
+    // Match the Excel layout: each B/I/N/G/O column runs down from 1 to 15.
+    for (let row = 0; row < 15; row++) {
+      for (let col = 0; col < 5; col++) {
+        const n = col * 15 + row + 1;
+        const cell = document.createElement("div");
+        cell.className = "num"; cell.id = `n${n}`; cell.textContent = n;
+        cell.setAttribute("aria-label", `${letterFor(n)} ${n}`);
+        board.appendChild(cell);
+      }
+    }
+  }
+  function save() {
+    try { localStorage.setItem(KEY, JSON.stringify({called, current})); } catch(e) {}
+  }
+  function load() {
+    try {
+      const data = JSON.parse(localStorage.getItem(KEY) || "null");
+      if (data && Array.isArray(data.called)) {
+        called = [...new Set(data.called.filter(n => Number.isInteger(n) && n >= 1 && n <= 75))];
+        current = Number.isInteger(data.current) && called.includes(data.current) ? data.current : (called.length ? called[called.length - 1] : null);
+      }
+    } catch(e) {}
+  }
+  function render() {
+    for (let n = 1; n <= 75; n++) {
+      const cell = document.getElementById(`n${n}`);
+      cell.classList.toggle("called", called.includes(n));
+      cell.classList.toggle("latest", n === current);
+    }
+    currentEl.textContent = current === null ? "READY" : spoken(current);
+    historyEl.innerHTML = "";
+    const recent = [...called].reverse().slice(0,5);
+    if (!recent.length) {
+      const span = document.createElement("span"); span.textContent = "Recent: none"; historyEl.appendChild(span);
+    } else {
+      recent.forEach(n => {
+        const span = document.createElement("span"); span.textContent = spoken(n); historyEl.appendChild(span);
+      });
+    }
+    pickButton.disabled = called.length >= 75;
+    if (called.length >= 75) statusEl.textContent = "ALL 75 NUMBERS CALLED";
+    save();
+  }
+  function speak(text) {
+    if (!("speechSynthesis" in window)) {
+      statusEl.textContent = "Voice not available in this browser";
+      return;
+    }
+    window.speechSynthesis.cancel();
+    const u = new SpeechSynthesisUtterance(`${text}. ${text}.`);
+    if (preferredVoice) u.voice = preferredVoice;
+    u.rate = 0.88;
+    window.speechSynthesis.speak(u);
+  }
+  function pickNext() {
+    const remaining = [];
+    for (let n=1; n<=75; n++) if (!called.includes(n)) remaining.push(n);
+    if (!remaining.length) { statusEl.textContent = "ALL 75 NUMBERS CALLED"; return; }
+    current = remaining[Math.floor(Math.random()*remaining.length)];
+    called.push(current);
+    render();
+    statusEl.textContent = `${75-called.length} NUMBERS LEFT`;
+    speak(spoken(current));
+  }
+  function resetGame() {
+    if (called.length && !confirm("Start a new game? This clears the current calls.")) return;
+    if ("speechSynthesis" in window) window.speechSynthesis.cancel();
+    called = []; current = null;
+    statusEl.textContent = "READY TO PLAY";
+    render();
+  }
+  function loadVoices() {
+    if (!("speechSynthesis" in window)) return;
+    voices = speechSynthesis.getVoices();
+    preferredVoice = voices.find(v => /zira|samantha|aria|jenny|female/i.test(v.name)) || null;
+  }
+  document.getElementById("pickButton").addEventListener("click", pickNext);
+  document.getElementById("resetButton").addEventListener("click", resetGame);
+  buildBoard();
+  loadVoices();
+  if ("speechSynthesis" in window) speechSynthesis.onvoiceschanged = loadVoices;
+  load();
+  render();
+})();
+</script>
+</body>
+</html>
